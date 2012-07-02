@@ -30,7 +30,7 @@
 
 # Backward compatibility for Django < 1.4
 try:
-    from django.utils.timezone improt now
+    from django.utils.timezone import now
 except ImportError:
     now = datetime.now
 
