@@ -26,10 +26,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-# 
+#
+
+# Backward compatibility for Django < 1.4
+try:
+    from django.utils.timezone improt now
+except ImportError:
+    now = datetime.now
 
 from xml.sax.saxutils import XMLGenerator
-from datetime import datetime
 
 
 GENERATOR_TEXT = 'django-atompub'
@@ -232,7 +237,7 @@ class AtomFeed(object):
             updates.sort()
             return updates[-1]
         else:
-            return datetime.now() # @@@ really we should allow a feed to define its "start" for this case
+            return now() # @@@ really we should allow a feed to define its "start" for this case
     
     
     def write_text_construct(self, handler, element_name, data):
