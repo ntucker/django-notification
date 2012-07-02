@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 try:
     from django.contrib.syndication.views import feed
 except ImportError:
-    from django.contrib.syndication.views import Feed
+    from django.contrib.syndication.views import Feed as feed
 
 from notification.models import *
 from notification.decorators import basic_auth_required, simple_basic_auth_callback
