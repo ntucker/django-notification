@@ -1,6 +1,6 @@
 # For Django < 1.4 compatibility
 try:
-    from django.utils.timzone import now
+    from django.utils.timezone import now
 except ImportError:
     from datetime import datetime
     now = datetime.now
