@@ -329,7 +329,7 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
             notice_type=notice_type, on_site=on_site, sender=sender)
         if should_send(user, notice_type, "1") and user.email and user.is_active: # Email
             recipients.append(user.email)
-        send_mail(subject, body, sender.email if sender and sender.email else settings.DEFAULT_FROM_EMAIL, recipients)
+        send_mail(subject, body, u" ".join((sender.first_name or sender.username, sender.last_name, u"<{0}>".format(settings.DEFAULT_FROM_EMAIL))) if sender else settings.DEFAULT_FROM_EMAIL, recipients)
     
     # reset environment to original language
     activate(current_language)
