@@ -12,12 +12,17 @@ from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import linebreaks, escape, striptags
 from django.utils.translation import ugettext_lazy as _
 
-from django.contrib.auth.models import User
+from django.contrib import auth
 from django.contrib.sites.models import Site
 
 from notification.models import Notice
 from notification.atomformat import Feed
 
+import django
+if django.VERSION[:2] < (1, 5):
+    from django.contrib.auth.models import User as AUTH_MODEL
+else:
+    AUTH_MODEL = auth.get_user_model()
 
 ITEMS_PER_FEED = getattr(settings, "ITEMS_PER_FEED", 20)
 DEFAULT_HTTP_PROTOCOL = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
@@ -54,7 +59,7 @@ class BaseNoticeFeed(Feed):
 class NoticeUserFeed(BaseNoticeFeed):
     
     def get_object(self, params):
-        return get_object_or_404(User, username=params[0].lower())
+        return get_object_or_404(AUTH_MODEL, username=params[0].lower())
     
     def feed_id(self, user):
         return "%s://%s%s" % (
