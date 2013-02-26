@@ -169,7 +169,7 @@ class Notice(models.Model):
         unseen = self.unseen
         if unseen:
             self.unseen = False
-            self.save()
+            self.save(update_fields=('unseen',))
         return unseen
     
     class Meta:
