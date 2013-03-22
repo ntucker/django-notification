@@ -14,7 +14,7 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.mail import send_mail
+from django.core.mail import send_mass_mail
 from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.loader import render_to_string
@@ -290,8 +290,10 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         "full.html",
     ) # TODO make formats configurable
     
+    from_email = u" ".join((sender.first_name or sender.username, sender.last_name, u"<{0}>".format(settings.DEFAULT_FROM_EMAIL))) if sender else settings.DEFAULT_FROM_EMAIL
+    
+    recipients = []
     for user in users:
-        recipients = []
         # get user language for user from language store defined in
         # NOTIFICATION_LANGUAGE_MODULE setting
         try:
@@ -328,8 +330,8 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         notice = Notice.objects.create(recipient=user, message=messages["notice.html"],
             notice_type=notice_type, on_site=on_site, sender=sender)
         if should_send(user, notice_type, "1") and user.email and user.is_active: # Email
-            recipients.append(user.email)
-        send_mail(subject, body, u" ".join((sender.first_name or sender.username, sender.last_name, u"<{0}>".format(settings.DEFAULT_FROM_EMAIL))) if sender else settings.DEFAULT_FROM_EMAIL, recipients)
+            recipients.append((subject, body, from_email, [user.email]))
+    send_mass_mail(recipients)
     
     # reset environment to original language
     activate(current_language)
