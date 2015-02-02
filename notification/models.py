@@ -69,7 +69,7 @@ class NoticeSetting(models.Model):
     user = models.ForeignKey(AUTH_MODEL_STRING, verbose_name=_("user"))
     notice_type = models.ForeignKey(NoticeType, verbose_name=_("notice type"))
     medium = models.CharField(_("medium"), max_length=1, choices=NOTICE_MEDIA)
-    send = models.BooleanField(_("send"))
+    send = models.BooleanField(_("send"), default=False)
     
     class Meta:
         verbose_name = _("notice setting")
@@ -148,7 +148,7 @@ class Notice(models.Model):
     added = models.DateTimeField(_("added"), default=now)
     unseen = models.BooleanField(_("unseen"), default=True)
     archived = models.BooleanField(_("archived"), default=False)
-    on_site = models.BooleanField(_("on site"))
+    on_site = models.BooleanField(_("on site"), default=False)
     
     objects = NoticeManager()
     
