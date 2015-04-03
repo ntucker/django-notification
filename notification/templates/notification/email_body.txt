@@ -3,5 +3,5 @@
 {{ message }}
 
 To see other notices or change how you receive notifications, please go to {{ notices_url }}.
-Reset your password: http://{{current_site}}{{password_url}}
+Reset your password: {{base_url}}{{password_url}}
 {% endblocktrans %}
