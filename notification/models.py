@@ -1,4 +1,5 @@
 # For Django < 1.4 compatibility
+from _ast import Sub
 try:
     from django.utils.timezone import now
 except ImportError:
@@ -25,6 +26,8 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+
+from logos.discussion.templatetags.discussion import get_article_subscription, get_user_subscription, get_group_subscription, get_base_url
 
 QUEUE_ALL = getattr(settings, "NOTIFICATION_QUEUE_ALL", False)
 
@@ -279,10 +282,7 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         unicode(current_site),
     )
     
-    notices_url = u"%s%s" % (
-        base_url,
-        reverse("notification_notices"),
-    )
+    notices_url = reverse("notification_notices")
     
     current_language = get_language()
     
@@ -307,15 +307,28 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         if language is not None:
             # activate the user's language
             activate(language)
+
+        subscription = None
+        if 'post' in extra_context:
+            subscription = (get_article_subscription(user, extra_context['post'], post_notification="True")
+                            or get_group_subscription(user, extra_context['post'])
+                            or get_user_subscription(user, extra_context['post'])
+                            )
+            base_url = get_base_url(subscription, extra_context['default_subdomain'])
+            current_site = subscription.site or current_site
         
         # update context with user specific translations
         context = Context({
             "recipient": user,
             "sender": sender,
             "notice": ugettext(notice_type.display),
-            "notices_url": notices_url,
+            "notices_url": u"%s%s" % (
+                    base_url,
+                    notices_url,
+                ),
             "current_site": current_site,
             "base_url": base_url,
+            "subscription": subscription,
         })
         context.update(extra_context)
         
