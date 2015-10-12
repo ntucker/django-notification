@@ -1,11 +1,11 @@
 
 import logging
 
-from django.core.management.base import NoArgsCommand
+from django.core.management.base import BaseCommand
 
 from notification.engine import send_all
 
-class Command(NoArgsCommand):
+class Command(BaseCommand):
     help = "Emit queued notices."
     
     def handle_noargs(self, **options):
