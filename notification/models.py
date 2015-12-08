@@ -27,7 +27,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from logos.discussion.templatetags.discussion import get_article_subscription, get_user_subscription, get_group_subscription, get_base_url
+from celery import shared_task
 
 QUEUE_ALL = getattr(settings, "NOTIFICATION_QUEUE_ALL", False)
 
@@ -256,6 +256,7 @@ def get_formatted_messages(formats, label, context):
     return format_templates
 
 
+@shared_task(ignore_result=True)
 def send_now(users, label, extra_context=None, on_site=True, sender=None):
     """
     Creates a new notice.
@@ -270,6 +271,7 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
     You can pass in on_site=False to prevent the notice emitted from being
     displayed on the site.
     """
+    from logos.discussion.templatetags.discussion import get_article_subscription, get_user_subscription, get_group_subscription, get_base_url
     if extra_context is None:
         extra_context = {}
     
@@ -309,7 +311,7 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
             activate(language)
 
         subscription = None
-        if 'post' in extra_context:
+        if 'post' in extra_context and label != 'vote_reset':
             subscription = (get_article_subscription(user, extra_context['post'], post_notification="True")
                             or get_group_subscription(user, extra_context['post'])
                             or get_user_subscription(user, extra_context['post'])
