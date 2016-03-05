@@ -121,4 +121,11 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(related_name='sent_notices', verbose_name='sender', to=settings.AUTH_USER_MODEL, null=True),
             preserve_default=True,
         ),
+        migrations.RunSQL(
+            sql="""CREATE INDEX notification_notice_recipient_on_site_unseen
+    ON notification_notice
+    USING btree
+    (recipient_id, on_site, unseen)
+    WHERE on_site = true AND unseen = true;""",
+        ),
     ]
