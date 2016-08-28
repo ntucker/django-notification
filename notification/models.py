@@ -1,5 +1,6 @@
 # For Django < 1.4 compatibility
 from _ast import Sub
+from django.db.utils import IntegrityError
 try:
     from django.utils.timezone import now
 except ImportError:
@@ -81,13 +82,14 @@ class NoticeSetting(models.Model):
 
 
 def get_notification_setting(user, notice_type, medium):
-    try:
-        return NoticeSetting.objects.get(user=user, notice_type=notice_type, medium=medium)
-    except NoticeSetting.DoesNotExist:
-        default = (NOTICE_MEDIA_DEFAULTS[medium] <= notice_type.default)
-        setting = NoticeSetting(user=user, notice_type=notice_type, medium=medium, send=default)
-        setting.save()
-        return setting
+    default = (NOTICE_MEDIA_DEFAULTS[medium] <= notice_type.default)
+    setting, created = NoticeSetting.objects.get_or_create(
+        user=user,
+        notice_type=notice_type,
+        medium=medium,
+        defaults={'send': default}
+    )
+    return setting
 
 
 def should_send(user, notice_type, medium):
