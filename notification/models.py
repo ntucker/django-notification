@@ -29,6 +29,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
 from celery import shared_task
+from account.models import EmailAddress
 
 QUEUE_ALL = getattr(settings, "NOTIFICATION_QUEUE_ALL", False)
 
@@ -350,7 +351,11 @@ def send_now(users, label, extra_context=None, on_site=True, sender=None):
         
         notice = Notice.objects.create(recipient=user, message=messages["notice.html"],
             notice_type=notice_type, on_site=on_site, sender=sender)
-        if should_send(user, notice_type, "1") and user.email and user.is_active: # Email
+        if (should_send(user, notice_type, "1")
+            and user.email
+            and user.is_active
+            and EmailAddress.objects.filter(user=user, verified=True, email=user.email).count()
+            ):
             recipients.append((subject, body, from_email, [user.email]))
     send_mass_mail(recipients)
     
