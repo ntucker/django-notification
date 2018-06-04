@@ -259,7 +259,7 @@ def get_formatted_messages(formats, label, context):
     return format_templates
 
 
-@shared_task(ignore_result=True)
+@shared_task(ignore_result=True, serializer='pickle')
 def send_now(users, label, extra_context=None, on_site=True, sender=None):
     """
     Creates a new notice.
